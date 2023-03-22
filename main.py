@@ -12,7 +12,7 @@ window = pygame.display.set_mode((400, 400))
 # Set window title
 pygame.display.set_caption('Neural network')
 
-numThings = 200
+numThings = 50
 things = []
   
 numFood = 100
@@ -20,6 +20,8 @@ food = []
   
 dx = 0
 dy = 0
+f_closest_x = 0
+f_closest_y = 0
   
   #class for things
 class Thing:
@@ -54,20 +56,22 @@ def run():
   running = True
   # Main loop
   while running:
-      
       # Fill the window with white color
       window.fill((100, 100, 100))
-  
-      if len(things) < 2:
-        running = False
+
+      if len(food) <= 1:
+        #if len(things) <= 1:
+        run()
   
       #draw enviorment
       for i in range(len(things)):
+        if things[i].s > 100:
+          things[i].s = 100
         if things[i].a == True:
           if things[i].r*15 <= 255:
-            pygame.draw.rect(window, (things[i].r*15, 0, 0), (things[i].x, things[i].y, things[i].s, things[i].s))
+            pygame.draw.rect(window, (things[i].r*15, 0, 0), (things[i].x - things[i].s/2, things[i].y - things[i].s/2, things[i].s, things[i].s))
           else:
-            pygame.draw.rect(window, (0, 255, 0), (things[i].x, things[i].y, things[i].s, things[i].s))
+            pygame.draw.rect(window, (0, 255, 0), (things[i].x - things[i].s/2, things[i].y - things[i].s/2, things[i].s, things[i].s))
   
       for i in range(len(food)):
         pygame.draw.rect(window, (0, 255, 0), (food[i].x, food[i].y, food[i].s, food[i].s))
@@ -81,7 +85,7 @@ def run():
             if things[j].a == True:
               if i != j:
                 if things[i].s/100*80 > things[j].s:
-                  if things[i].x < things[j].x + things[j].s and things[i].x + things[i].s > things[j].x and things[i].y < things[j].y + things[j].s and things[i].s + things[i].y > things[j].y:
+                  if (things[i].x - things[i].s/2 < things[j].x + things[j].s/2) and (things[i].x + things[i].s/2 > things[j].x - things[j].s/2) and (things[i].y - things[i].s/2 < things[j].y + things[j].s/2) and (things[i].y + things[i].s/2 > things[j].y - things[j].s/2):
                     things[i].r += 1
                     things[i].s += 2
                     things[j].a = False
@@ -105,7 +109,7 @@ def run():
                         c = True
           j = 0
           while j < len(food):
-            if things[i].x < food[j].x + food[j].s and things[i].x + things[i].s > food[j].x and things[i].y < food[j].y + food[j].s and things[i].s + things[i].y > food[j].y:
+            if things[i].x - things[i].s/2 < food[j].x - food[j].s/2 + food[j].s and things[i].x - things[i].s/2 + things[i].s > food[j].x - food[j].s/2 and things[i].y - things[i].s/2 < food[j].y - food[j].s/2 + food[j].s and things[i].s + things[i].y - things[i].s/2 > food[j].y- food[j].s/2 :
               del food[j]
               things[i].s += 1
             else:
@@ -130,19 +134,7 @@ def run():
   
           things[i].x += dx
           things[i].y += dy
-
-      hehe = 0
-      for i in range(len(things)):
-        if things[i].a == True:
-          hehe+=1
           
-
-      if len(food) <= 0:
-        run()
-            
-            
-          
-        
       # ! reward
   
       # ! rinse and repeat
@@ -151,6 +143,7 @@ def run():
       pygame.display.update()
   
       time.sleep(0.06)
+    
       # Event loop
       for event in pygame.event.get():
           # Check for closing window
