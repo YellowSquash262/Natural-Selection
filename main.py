@@ -12,7 +12,7 @@ window = pygame.display.set_mode((400, 400))
 # Set window title
 pygame.display.set_caption('Neural network')
 
-numThings = 20
+numThings = 200
 things = []
   
 numFood = 100
@@ -23,11 +23,13 @@ dy = 0
   
   #class for things
 class Thing:
-    def __init__(self, x, y, s, p):
+    def __init__(self, x, y, s, p, a, r):
       self.x = x
       self.y = y
       self.s = s # size
       self.p = p # pixels per frame
+      self.a = a # alive
+      self.r = r # reward
   
   #class for food
 class Food:
@@ -36,13 +38,17 @@ class Food:
       self.y = y
       self.s = s
 
+for i in range(numThings):
+    things.append(Thing(round(random.randint(0, 400)), round(random.randint(0, 400)), round(random.randint(4, 10)) ,round(random.randint(4, 6)), True, 0))
+
 def run():
-  
-  for i in range(numThings):
-    things.append(Thing(round(random.randint(0, 400)), round(random.randint(0, 400)), round(random.randint(4, 10)) ,round(random.randint(4, 6))))
-  
+
   for i in range(numFood):
       food.append(Food(random.randint(0, 400), random.randint(0, 400), 5))
+
+  for i in range(len(things)):
+        things[i].x = round(random.randint(0, 400))
+        things[i].y = round(random.randint(0, 400))
   
   # Create a variable to control the main loop
   running = True
@@ -57,35 +63,38 @@ def run():
   
       #draw enviorment
       for i in range(len(things)):
-        pygame.draw.rect(window, (0, 0, 0), (things[i].x, things[i].y, things[i].s, things[i].s))
+        if things[i].a == True:
+          if things[i].r*15 <= 255:
+            pygame.draw.rect(window, (things[i].r*15, 0, 0), (things[i].x, things[i].y, things[i].s, things[i].s))
+          else:
+            pygame.draw.rect(window, (0, 255, 0), (things[i].x, things[i].y, things[i].s, things[i].s))
   
       for i in range(len(food)):
         pygame.draw.rect(window, (0, 255, 0), (food[i].x, food[i].y, food[i].s, food[i].s))
   
       # ! get nearest food and creture and creture size
       # closest creture
-      w = 0
+    
       for i in range(len(things)):
-        if w == len(things):
-          break
-        w+=1
-        for j in range(len(things)):
+        if things[i].a == True:
+          for j in range(len(things)):
+            if things[j].a == True:
               if i != j:
-                if things[i].s/100*20 > things[j].s:
+                if things[i].s/100*80 > things[j].s:
                   if things[i].x < things[j].x + things[j].s and things[i].x + things[i].s > things[j].x and things[i].y < things[j].y + things[j].s and things[i].s + things[i].y > things[j].y:
-                    del things[j]
+                    things[i].r += 1
+                    things[i].s += 2
+                    things[j].a = False
                   
-      w = 0
       for i in range(len(things)):
-          if w == len(things):
-            break
-          w+=1
+        if things[i].a == True:
           c_closest_x = None
           c_closest_y = None
           min_distance = float('inf')
           c = False
         
           for j in range(len(things)):
+            if things[j].a == True:
               if i != j:
                   if things[i].s/100*80 > things[j].s:
                     CDistance = ((things[i].x - things[j].x)**2 + (things[i].y - things[j].y)**2)**0.5
@@ -96,9 +105,9 @@ def run():
                         c = True
           j = 0
           while j < len(food):
-            #ERROR HERE
             if things[i].x < food[j].x + food[j].s and things[i].x + things[i].s > food[j].x and things[i].y < food[j].y + food[j].s and things[i].s + things[i].y > food[j].y:
               del food[j]
+              things[i].s += 1
             else:
               j += 1
         
@@ -122,8 +131,14 @@ def run():
           things[i].x += dx
           things[i].y += dy
 
-          if len(food) <= 0:
-            run()
+      hehe = 0
+      for i in range(len(things)):
+        if things[i].a == True:
+          hehe+=1
+          
+
+      if len(food) <= 0:
+        run()
             
             
           
@@ -135,7 +150,7 @@ def run():
       #Update the windo
       pygame.display.update()
   
-      time.sleep(0.05)
+      time.sleep(0.06)
       # Event loop
       for event in pygame.event.get():
           # Check for closing window
