@@ -1,3 +1,5 @@
+
+
 import pygame
 import random
 import math
@@ -10,34 +12,34 @@ window = pygame.display.set_mode((400, 400))
 # Set window title
 pygame.display.set_caption('Neural network')
 
-def run():
+numThings = 20
+things = []
   
-  numThings = 20
-  things = []
+numFood = 100
+food = []
   
-  numFood = 60
-  food = []
-  
-  dx = 0
-  dy = 0
+dx = 0
+dy = 0
   
   #class for things
-  class Thing:
+class Thing:
     def __init__(self, x, y, s, p):
       self.x = x
       self.y = y
       self.s = s # size
       self.p = p # pixels per frame
   
-  for i in range(numThings):
-    things.append(Thing(round(random.randint(0, 400)), round(random.randint(0, 400)), round(random.randint(4, 10)) ,round(random.randint(4, 6))))
-  
   #class for food
-  class Food:
+class Food:
     def __init__(self, x, y, s):
       self.x = x
       self.y = y
       self.s = s
+
+def run():
+  
+  for i in range(numThings):
+    things.append(Thing(round(random.randint(0, 400)), round(random.randint(0, 400)), round(random.randint(4, 10)) ,round(random.randint(4, 6))))
   
   for i in range(numFood):
       food.append(Food(random.randint(0, 400), random.randint(0, 400), 5))
@@ -72,7 +74,6 @@ def run():
                 if things[i].s/100*20 > things[j].s:
                   if things[i].x < things[j].x + things[j].s and things[i].x + things[i].s > things[j].x and things[i].y < things[j].y + things[j].s and things[i].s + things[i].y > things[j].y:
                     del things[j]
-                    break
                   
       w = 0
       for i in range(len(things)):
@@ -135,7 +136,6 @@ def run():
       pygame.display.update()
   
       time.sleep(0.05)
-    
       # Event loop
       for event in pygame.event.get():
           # Check for closing window
