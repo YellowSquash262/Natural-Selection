@@ -63,6 +63,7 @@ def run():
   for i in range(len(things)):
         things[i].x = round(random.randint(0, screenSize))
         things[i].y = round(random.randint(0, screenSize))
+        things[i].a = True
   
   # Create a variable to control the main loop
   running = True
