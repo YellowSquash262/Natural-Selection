@@ -3,10 +3,14 @@ import random
 import math
 import time
 
+energy = 200 #energy
+energySev = 1 #energy sevarity, the higher the less intense
+eatEn = 10 # energy repleneshed when eat
+
 numThings = 100
 things = []
   
-numFood = 1000
+numFood = 100
 food = []
 
 screenSize = 400
@@ -28,15 +32,15 @@ def maxNum(x, y):
   
   #class for things
 class Thing:
-    def __init__(self, x, y, s, ss, p, a, k, f):
+    def __init__(self, x, y, s, p, a, k, f, e):
       self.x = x
       self.y = y
       self.s = s # size
-      self.ss = ss #size squared
       self.p = p # pixels per frame
       self.a = a # alive
       self.k = k #kills
       self.f = f #food eaten
+      self.e = e # energy
   
   #class for food
 class Food:
@@ -46,7 +50,7 @@ class Food:
       self.s = s
 
 for i in range(numThings):
-    things.append(Thing(round(random.randint(0, screenSize)), round(random.randint(0, screenSize)), 5 , round(random.randint(16, 36), 2), round(random.randint(4, 6), 2) , True, 0, 0))
+    things.append(Thing(round(random.randint(0, screenSize)), round(random.randint(0, screenSize)),round(random.randint(1, 30), 2) , round(random.randint(1, 10), 2) , True, 0, 0, 0))
 
 # Initialize pygame
 pygame.init()
@@ -64,6 +68,7 @@ def run():
         things[i].x = round(random.randint(0, screenSize))
         things[i].y = round(random.randint(0, screenSize))
         things[i].a = True
+        things[i].e = ((energy/2)/(things[i].p/energySev)) + ((energy/2)/(things[i].s/energySev))
   
   # Create a variable to control the main loop
   running = True
@@ -76,14 +81,16 @@ def run():
       e = False
       for i in range(len(things)):
         if things[i].a == True:
+          things[i].e -= 1
+          if things[i].e <= 0:
+            things[i].a = False
           ac += 1
-          if things[i].ss > 10000:
-            things[i].ss = 10000
-          things[i].s = round(math.sqrt(things[i].ss))
+          if things[i].s > 80:
+            things[i].s = 80
           for j in range(len(things)):
             if things[j].a == True:
               if i != j:
-                if things[i].ss/100*80 > things[j].ss:
+                if things[i].s/100*80 > things[j].s:
                   e = True
 
       if len(food) <= 0:
@@ -106,11 +113,11 @@ def run():
           for j in range(len(things)):
             if things[j].a == True:
               if i != j:
-                if things[i].ss/100*80 > things[j].ss:
+                if things[i].s/100*80 > things[j].s:
                   if (things[i].x - things[i].s/2 < things[j].x + things[j].s/2) and (things[i].x + things[i].s/2 > things[j].x - things[j].s/2) and (things[i].y - things[i].s/2 < things[j].y + things[j].s/2) and (things[i].y + things[i].s/2 > things[j].y - things[j].s/2):
                     things[i].k += 1
-                    things[i].ss += 2
                     things[j].a = False
+                    things[i].e += eatEn*2
                     ac -= 1
                   
       for i in range(len(things)):
@@ -134,8 +141,8 @@ def run():
           while j < len(food):
             if things[i].x - things[i].s/2 < food[j].x - food[j].s/2 + food[j].s and things[i].x - things[i].s/2 + things[i].s > food[j].x - food[j].s/2 and things[i].y - things[i].s/2 < food[j].y - food[j].s/2 + food[j].s and things[i].s + things[i].y - things[i].s/2 > food[j].y- food[j].s/2 :
               del food[j]
+              things[i].e += eatEn
               things[i].f += 1
-              things[i].ss += 1
             else:
               j += 1
         
