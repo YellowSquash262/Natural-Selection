@@ -3,27 +3,29 @@ import random
 import math
 import time
 
-energy = 200 #energy
-energySev = 1 #energy sevarity, the higher the less intense
-eatEn = 10 # energy repleneshed when eat
+numThings = 25
+numFood = 200
+screenSize = 400
 
-numThings = 100
+energy = 50 #energy
+energySev = 5 #energy sevarity, the higher the less intense
+eatEn = 5 # energy repleneshed when eat
+
 things = []
-  
-numFood = 100
 food = []
+#thingsGen = [] #things genetics
 
 screenSize = 400
   
 dx = 0
 dy = 0
-f_closest_x = 0
-f_closest_y = 0
 
 e = False #end loop
 ac = 0 #alive creatures
+loop = 0
 
-
+if (numThings % 2) != 0: #makes shit even
+  numThings += 1 
 
 def maxNum(x, y):
   if x > y:
@@ -32,15 +34,16 @@ def maxNum(x, y):
   
   #class for things
 class Thing:
-    def __init__(self, x, y, s, p, a, k, f, e):
+    def __init__(self, x, y, s, p, a, k, f, e, r):
       self.x = x
       self.y = y
       self.s = s # size
       self.p = p # pixels per frame
       self.a = a # alive
-      self.k = k #kills
+      self.k = k # kills
       self.f = f #food eaten
       self.e = e # energy
+      self.r = r # ranking
   
   #class for food
 class Food:
@@ -50,7 +53,7 @@ class Food:
       self.s = s
 
 for i in range(numThings):
-    things.append(Thing(round(random.randint(0, screenSize)), round(random.randint(0, screenSize)),round(random.randint(1, 30), 2) , round(random.randint(1, 10), 2) , True, 0, 0, 0))
+    things.append(Thing(round(random.randint(0, screenSize)), round(random.randint(0, screenSize)),round(random.randint(1, 30), 2) , round(random.randint(1, 10), 2) , True, 0, 0, 0, 0))
 
 # Initialize pygame
 pygame.init()
@@ -61,14 +64,36 @@ pygame.display.set_caption('Neural network')
 
 def run():
 
+  global loop
+  loop += 1
+
   for i in range(numFood):
       food.append(Food(random.randint(0, screenSize), random.randint(0, screenSize), 2))
+
+  if loop > 1:
+    j = 0
+    while j < len(things):
+          #print(str(len(things)) + ", " + str(j) + ", " + str(numThings/2))
+          if things[j].r < round(numThings/2):
+            del things[j]
+          j+=1
+
+  for i in range(len(things)):
+    things.append(things[i])
 
   for i in range(len(things)):
         things[i].x = round(random.randint(0, screenSize))
         things[i].y = round(random.randint(0, screenSize))
+        things[i].s += round(random.randint(-1, 1), 2)
+        things[i].p += round(random.randint(-1, 1), 2)
+        if things[i].p <= 0:
+          things[i].p = 0.1
+        if things[i].s <= 0:
+          things[i].s = 0.1
         things[i].a = True
         things[i].e = ((energy/2)/(things[i].p/energySev)) + ((energy/2)/(things[i].s/energySev))
+
+  ranking = 0
   
   # Create a variable to control the main loop
   running = True
@@ -78,7 +103,7 @@ def run():
       window.fill((100, 100, 100))
 
       ac = 0
-      e = False
+      #e = False
       for i in range(len(things)):
         if things[i].a == True:
           things[i].e -= 1
@@ -87,7 +112,7 @@ def run():
           ac += 1
           if things[i].s > 80:
             things[i].s = 80
-          for j in range(len(things)):
+          """for j in range(len(things)):
             if things[j].a == True:
               if i != j:
                 if things[i].s/100*80 > things[j].s:
@@ -95,7 +120,13 @@ def run():
 
       if len(food) <= 0:
         if e == False or ac <= 1:
-          run()
+          run()"""
+
+      if ac <= 1:
+        run()
+        for i in range(len(things)):
+          if things[i].a == True:
+            things[i].r = ranking
   
       #draw enviorment
       for i in range(len(things)):
@@ -115,9 +146,11 @@ def run():
               if i != j:
                 if things[i].s/100*80 > things[j].s:
                   if (things[i].x - things[i].s/2 < things[j].x + things[j].s/2) and (things[i].x + things[i].s/2 > things[j].x - things[j].s/2) and (things[i].y - things[i].s/2 < things[j].y + things[j].s/2) and (things[i].y + things[i].s/2 > things[j].y - things[j].s/2):
-                    things[i].k += 1
                     things[j].a = False
+                    things[j].r = ranking
+                    ranking += 1
                     things[i].e += eatEn*2
+                    things[i].k += 1
                     ac -= 1
                   
       for i in range(len(things)):
@@ -172,8 +205,9 @@ def run():
     
       #Update the windo
       pygame.display.update()
-  
-      time.sleep(0.1)
+
+      if len(food) > 0:
+        time.sleep(0.2)
     
       # Event loop
       for event in pygame.event.get():
