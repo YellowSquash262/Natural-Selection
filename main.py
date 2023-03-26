@@ -161,7 +161,7 @@ def run():
                     ac -= 1
                   
       for i in range(len(things)):
-        if things[i].a == True:
+        if things[i].a == True: 
           c_closest_x = None
           c_closest_y = None
           min_distance = float('inf')
