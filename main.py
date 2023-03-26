@@ -78,18 +78,25 @@ def run():
             del things[j]
           j+=1
 
-  for i in range(len(things)):
-    things.append(things[i])
+  if loop > 1:
+    for i in range(len(things)):
+      things.append(things[i])
+      if things[i].r == numThings:
+        print("Size: " + str(things[i].s) + ", Speed" + str(things[i].p))
+
+  
 
   for i in range(len(things)):
         things[i].x = round(random.randint(0, screenSize))
         things[i].y = round(random.randint(0, screenSize))
         things[i].s += round(random.randint(-1, 1), 2)
         things[i].p += round(random.randint(-1, 1), 2)
-        if things[i].p <= 0:
-          things[i].p = 0.1
-        if things[i].s <= 0:
-          things[i].s = 0.1
+        things[i].k = 0
+        things[i].f = 0
+        if things[i].p <= 1:
+          things[i].p = 1
+        if things[i].s <= 2:
+          things[i].s = 2
         things[i].a = True
         things[i].e = ((energy/2)/(things[i].p/energySev)) + ((energy/2)/(things[i].s/energySev))
 
@@ -206,8 +213,8 @@ def run():
       #Update the windo
       pygame.display.update()
 
-      if len(food) > 0:
-        time.sleep(0.2)
+      #if len(food) > 0:
+      #  time.sleep(0.2)
     
       # Event loop
       for event in pygame.event.get():
